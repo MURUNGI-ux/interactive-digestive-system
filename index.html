@@ -1,0 +1,780 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioLink</title>
+    <style>
+        /* Base page styling with dark blue animated grid background */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: #0a192f;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: moveGrid 8s ease-in-out infinite alternate;
+            font-family: Arial, sans-serif;
+            color: white;
+            position: relative;
+            padding-bottom: 60px;
+            padding-top: 60px;
+            box-sizing: border-box;
+        }
+
+        @keyframes moveGrid {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 150px; }
+        }
+
+        /* --- Top Navigation Bar --- */
+        .navbar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 900;
+            padding: 0 25px;
+            box-sizing: border-box;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-icon-btn, .login-nav-btn, .class-select-wrapper {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 12px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .home-icon-btn, .login-nav-btn {
+            cursor: pointer;
+        }
+
+        .home-icon-btn:hover, .login-nav-btn:hover {
+            background-color: #007bff;
+            border-color: #007bff;
+            transform: translateY(-2px);
+        }
+
+        .class-select-wrapper select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .class-select-wrapper select option {
+            background-color: #172a45;
+            color: white;
+        }
+
+        /* Centered Pop-up Overlay */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;    
+            z-index: 1000;
+        }
+
+        .popup-box {
+            background: #172a45;
+            color: #ffffff;
+            padding: 30px;
+            border-radius: 28px;
+            text-align: center;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+            width: 310px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scaleUp {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .popup-box h2 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .reg-form, .login-form {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        input {
+            padding: 12px;
+            background-color: #0a192f;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #8892b0;
+        }
+
+        input:focus {
+            border-color: #007bff;
+        }
+
+        .action-btn {
+            margin-top: 10px;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .toggle-text {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #8892b0;
+        }
+
+        .toggle-text span {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .lang-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* --- Main Subjects Dashboard Section --- */
+        .dashboard-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: calc(100vh - 120px);
+            padding: 40px 20px;
+            box-sizing: border-box;
+            animation: fadeInPage 0.4s ease-out;
+        }
+
+        @keyframes fadeInPage {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .dashboard-container h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .dashboard-container p {
+            color: #8892b0;
+            margin-bottom: 40px;
+        }
+
+        .subject-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* --- Interactive Subject Button Container --- */
+        .subject-item-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 360px;
+            height: 90px;
+            cursor: pointer;
+        }
+
+        /* Circular Icon Button */
+        .subject-circle-btn {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #172a45;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            z-index: 3;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, background-color 0.3s;
+        }
+
+        /* Revealed Connected Subject Card */
+        .subject-card-info {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0px;
+            height: 64px;
+            background: #172a45;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            padding-left: 0px;
+            opacity: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 1;
+            transition: all 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .subject-card-info h3 {
+            margin: 0;
+            font-size: 17px;
+            color: #ffffff;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+        }
+
+        /* Hover States: Circle rotates to the start of the card; Card expands to full width */
+        .subject-item-wrapper:hover .subject-circle-btn {
+            transform: translateX(-125px) rotate(-360deg);
+            border-color: #007bff;
+            background-color: #1e3a5f;
+        }
+
+        .subject-item-wrapper:hover .subject-card-info {
+            width: 250px;
+            transform: translateX(-125px);
+            padding-left: 88px;
+            opacity: 1;
+            border-color: #007bff;
+        }
+
+        /* --- Full-Screen Dedicated Subject Page --- */
+        .subject-page-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: calc(100vh - 120px);
+            padding: 40px 20px;
+            box-sizing: border-box;
+            animation: slideLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideLeft {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .content-box {
+            background: #172a45;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .content-box h2 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        .content-box p {
+            color: #e2e8f0;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .content-box ul {
+            padding-left: 20px;
+            color: #cbd5e1;
+        }
+
+        .content-box li {
+            margin-bottom: 12px;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: #8892b0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+            align-self: flex-start;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: white;
+            border-color: #007bff;
+        }
+
+        /* --- Footer --- */
+        .global-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8892b0;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: rgba(10, 25, 47, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 500;
+        }
+
+        /* --- Notification Toast --- */
+        .success-toast {
+            display: none;
+            position: fixed;
+            bottom: 80px;            
+            left: 50%;                
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 14px;
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            z-index: 2000;
+            animation: slideUpFade 0.3s ease-in-out;
+        }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar" id="topNavbar">
+        <div class="nav-brand">
+            <span>BioLink</span>
+        </div>
+       
+        <div class="nav-controls">
+            <button class="login-nav-btn" onclick="openLoginModal()" title="Login / Switch Account">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span id="navLoginText">Login</span>
+            </button>
+
+            <div class="class-select-wrapper" title="Change Class">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
+                <select id="classSelector" onchange="changeClass(this.value)">
+                    <option value="S1">S1</option>
+                    <option value="S2">S2</option>
+                    <option value="S3">S3</option>
+                    <option value="S4">S4</option>
+                </select>
+            </div>
+
+            <button class="home-icon-btn" onclick="goHome()" title="Go to Dashboard">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span id="navHomeText">Home</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="popup-overlay" id="welcomePopup">
+        <div class="popup-box">
+            <h2 id="popupTitle">Welcome to BioLink</h2>
+           
+            <div id="welcomeChoices">
+                <button class="action-btn" onclick="showForm('register')">Register</button>
+                <button class="action-btn" style="background-color: #6c757d;" onclick="showForm('login')">Login</button>
+            </div>
+
+            <form class="reg-form" id="registerForm" onsubmit="handleAuthSubmit(event, 'Sign Up')">
+                <input type="text" id="regUsername" placeholder="Username" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit" class="action-btn">Submit Register</button>
+                <p class="toggle-text">Already have an account? <span onclick="showForm('login')">Login</span></p>
+            </form>
+
+            <form class="login-form" id="loginForm" onsubmit="handleAuthSubmit(event, 'Login')">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit" class="action-btn" style="background-color: #6c757d;">Submit Login</button>
+                <p class="toggle-text">Need an account? <span onclick="showForm('register')">Register</span></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="langPopup" style="display: none;">
+        <div class="popup-box">
+            <h2>Select Language / Chagua Lugha / Choisir la langue</h2>
+            <div class="lang-options">
+                <button class="action-btn" onclick="selectLanguage('en')">English</button>
+                <button class="action-btn" style="background-color: #009688;" onclick="selectLanguage('sw')">Kiswahili</button>
+                <button class="action-btn" style="background-color: #673ab7;" onclick="selectLanguage('fr')">Français</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container" id="dashboard">
+        <h1 id="dashTitle">Welcome "User" (S1)</h1>
+        <p id="dashSubtitle">Select a subject to begin learning</p>
+       
+        <div class="subject-grid">
+            <div class="subject-item-wrapper" onclick="openSubjectPage('Biology')">
+                <div class="subject-circle-btn">🧬</div>
+                <div class="subject-card-info">
+                    <h3 id="subjectBioTitle">Biology</h3>
+                </div>
+            </div>
+
+            <div class="subject-item-wrapper" onclick="openSubjectPage('Chemistry')">
+                <div class="subject-circle-btn">🧪</div>
+                <div class="subject-card-info">
+                    <h3 id="subjectChemTitle">Chemistry</h3>
+                </div>
+            </div>
+
+            <div class="subject-item-wrapper" onclick="openSubjectPage('Food')">
+                <div class="subject-circle-btn">🥗</div>
+                <div class="subject-card-info">
+                    <h3 id="subjectFoodTitle">Food &amp; Nutrition</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="subject-page-view" id="subjectPageView">
+        <div style="max-width: 750px; width: 100%; display: flex; flex-direction: column;">
+            <button class="back-btn" id="backBtn" onclick="closeSubjectPage()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span id="backBtnText">← Back to Dashboard</span>
+            </button>
+           
+            <div class="content-box">
+                <h2 id="pageIntroTitle">Subject Title</h2>
+                <p id="pageIntroText">Subject explanation details...</p>
+                <h4 id="pageTopicsHeader" style="color: #8892b0; margin-bottom: 12px; font-size: 18px;">Core Syllabus Topics:</h4>
+                <ul id="pageIntroTopics"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-toast" id="successNotification">
+        <span id="successMessage">✓ Action Successful! Welcome to BioLink.</span>
+    </div>
+
+    <footer class="global-footer">
+        &copy; 2026 BIOLINK_MRM. All rights reserved.
+    </footer>
+
+    <script>
+        let currentActionType = '';
+        let selectedLang = 'en';
+        let currentClass = 'S1';
+        let activeUsername = 'User';
+
+        const subjectData = {
+            en: {
+                homeNav: "Home",
+                loginNav: "Login",
+                backText: "← Back to Dashboard",
+                topicsHeader: "Core Syllabus Topics:",
+                welcomePrefix: "Welcome",
+                classChanged: "Switched to Class",
+                bioName: "Biology",
+                chemName: "Chemistry",
+                foodName: "Food & Nutrition",
+                Biology: {
+                    title: "Introduction to Biology",
+                    desc: "Biology is the natural science that studies life and living organisms, including their physical structure, chemical processes, molecular interactions, physiological mechanisms, development, and evolution. Through BioLink, you will learn how micro-organisms, plants, and animals survive and interact within our ecosystems.",
+                    topics: ["Cell Biology & Structure", "Genetics and DNA Inheritance", "Human Anatomy and Physiology", "Ecology and Environmental Balance"]
+                },
+                Chemistry: {
+                    title: "Introduction to Chemistry",
+                    desc: "Chemistry explores the properties of matter, the changes it undergoes, and the energy laws that control these changes. It bridges physics and other natural sciences. You will dive deep into atomic models, chemical bond combinations, molecular transformations, and laboratory properties.",
+                    topics: ["The Periodic Table & Elements", "Chemical Reactions and Balancing", "Acids, Bases, and Salts", "Organic Chemistry Basics"]
+                },
+                Food: {
+                    title: "Introduction to Food & Nutrition",
+                    desc: "Food and Nutrition integrates health sciences with chemical combinations to understand how nutritional components sustain human life. This course explores dietary planning, nutrient processing inside metabolic pathways, food microbiology safety, and nutritional deficiency preventions.",
+                    topics: ["Macro and Micronutrients", "Dietary Planning and Balanced Meals", "Food Preservation Techniques", "Metabolism and Human Growth"]
+                }
+            },
+            sw: {
+                homeNav: "Nyumbani",
+                loginNav: "Ingia",
+                backText: "← Rudi kwenye Dashibodi",
+                topicsHeader: "Mada Kuu Utakazojifunza:",
+                welcomePrefix: "Karibu",
+                classChanged: "Umebadilisha kwenda Darasa la",
+                bioName: "Biolojia",
+                chemName: "Kemia",
+                foodName: "Chakula na Lishe",
+                Biology: {
+                    title: "Utangulizi wa Biolojia",
+                    desc: "Biolojia ni sayansi ya asili inayochunguza viumbe hai, muundo wao wa kimaumbile, michakato ya kemikali, mwingiliano wa molekuli, mifumo ya kisaikolojia, ukuaji na mabadiliko yao.",
+                    topics: ["Muundo na Kazi za Seli", "Jenetiki na Urithi wa DNA", "Anatomi ya Binadamu na Kisaikolojia", "Ikolojia na Usawa wa Mazingira"]
+                },
+                Chemistry: {
+                    title: "Utangulizi wa Kemia",
+                    desc: "Kemia inachunguza sifa za maada, mabadiliko yanayotokea, na sheria za nishati zinazodhibiti mabadiliko haya. Inajenga daraja kati ya fizikia na sayansi nyingine za asili.",
+                    topics: ["Mfumo wa Vipindi wa Elementi", "Mijiko ya Kikemia na Usawazishaji", "Asidi, Besi, na Chumvi", "Misingi ya Kemia ya Organiki"]
+                },
+                Food: {
+                    title: "Utangulizi wa Chakula na Lishe",
+                    desc: "Chakula na Lishe huunganisha sayansi ya afya na mchanganyiko wa kemikali ili kuelewa jinsi vipengele vya lishe vinavyoendeleza maisha ya mwanadamu na kuzuia magonjwa.",
+                    topics: ["Virutubisho Vikubwa na Vidogo (Macro & Micro)", "Upangaji wa Mlo na Lishe Bora", "Mbinu za Kuhifadhi Chakula", "Kimeng'enya na Ukuaji wa Mwili"]
+                }
+            },
+            fr: {
+                homeNav: "Accueil",
+                loginNav: "Connexion",
+                backText: "← Retour au tableau de bord",
+                topicsHeader: "Sujets principaux du programme:",
+                welcomePrefix: "Bienvenue",
+                classChanged: "Passé à la Classe",
+                bioName: "Biologie",
+                chemName: "Chimie",
+                foodName: "Alimentation",
+                Biology: {
+                    title: "Introduction à la Biologie",
+                    desc: "La biologie est la science naturelle qui étudie la vie et les organismes vivants, y compris leur structure physique, leurs processus chimiques, leurs interactions moléculaires et leur évolution.",
+                    topics: ["Biologie Cellulaire & Structure", "Génétique et Hérédité de l'ADN", "Anatomie et Physiologie Humaine", "Écologie et Équilibre Environnemental"]
+                },
+                Chemistry: {
+                    title: "Introduction à la Chimie",
+                    desc: "La chimie explore les propriétés de la matière, les changements qu'elle subit et les lois énergétiques qui régissent ces transformations. Elle fait le pont entre la physique et d'autres sciences.",
+                    topics: ["Le Tableau Périodique & Éléments", "Réactions Chimiques et Équilibrage", "Acides, Bases et Sels", "Bases de la Chimie Organique"]
+                },
+                Food: {
+                    title: "Introduction à l'Alimentation et Nutrition",
+                    desc: "Ce cours intègre les sciences de la santé pour comprendre comment les composants nutritionnels soutiennent la vie humaine. Vous explorerez la planification diététique et le métabolisme.",
+                    topics: ["Macro et Micronutriments", "Planification Diététique & Repas Équilibrés", "Techniques de Conservation des Aliments", "Métabolisme et Croissance Humaine"]
+                }
+            }
+        };
+
+        function openLoginModal() {
+            document.getElementById('welcomeChoices').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('popupTitle').innerText = 'Welcome to BioLink';
+            document.getElementById('welcomePopup').style.display = 'flex';
+        }
+
+        function showForm(type) {
+            document.getElementById('welcomeChoices').style.display = 'none';
+            if (type === 'register') {
+                document.getElementById('popupTitle').innerText = 'Create an Account';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'flex';
+            } else if (type === 'login') {
+                document.getElementById('popupTitle').innerText = 'Account Login';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'flex';
+            }
+        }
+
+        function handleAuthSubmit(event, actionType) {
+            event.preventDefault();
+            currentActionType = actionType;
+
+            if (actionType === 'Sign Up') {
+                const regInput = document.getElementById('regUsername').value.trim();
+                if (regInput) activeUsername = regInput;
+            } else if (actionType === 'Login') {
+                const loginEmail = document.getElementById('loginEmail').value.trim();
+                if (loginEmail) {
+                    activeUsername = loginEmail.split('@')[0];
+                }
+            }
+
+            document.getElementById('welcomePopup').style.display = 'none';
+            document.getElementById('langPopup').style.display = 'flex';
+        }
+
+        function selectLanguage(lang) {
+            selectedLang = lang;
+            document.getElementById('langPopup').style.display = 'none';
+           
+            const toastMessage = document.getElementById('successMessage');
+            const dashSubtitle = document.getElementById('dashSubtitle');
+            const navHomeText = document.getElementById('navHomeText');
+            const navLoginText = document.getElementById('navLoginText');
+           
+            if (lang === 'sw') {
+                toastMessage.innerText = currentActionType === 'Login' ? '✓ Umefanikiwa Kuingia!' : '✓ Umefanikiwa Kujisajili!';
+                dashSubtitle.innerText = 'Chagua somo ili uanze kujifunza';
+            } else if (lang === 'fr') {
+                toastMessage.innerText = currentActionType === 'Login' ? '✓ Connexion réussie !' : '✓ Inscription réussie !';
+                dashSubtitle.innerText = 'Sélectionnez une matière pour commencer à apprendre';
+            } else {
+                toastMessage.innerText = currentActionType === 'Login' ? '✓ Successful Login!' : '✓ Successful Sign Up!';
+                dashSubtitle.innerText = 'Select a subject to begin learning';
+            }
+
+            document.getElementById('subjectBioTitle').innerText = subjectData[lang].bioName;
+            document.getElementById('subjectChemTitle').innerText = subjectData[lang].chemName;
+            document.getElementById('subjectFoodTitle').innerText = subjectData[lang].foodName;
+
+            updateDashboardTitle();
+            navHomeText.innerText = subjectData[lang].homeNav;
+            navLoginText.innerText = subjectData[lang].loginNav;
+            document.getElementById('topNavbar').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'flex';
+
+            showNotification(toastMessage.innerText);
+        }
+
+        function changeClass(selectedClass) {
+            currentClass = selectedClass;
+            updateDashboardTitle();
+           
+            const msg = `${subjectData[selectedLang].classChanged} ${currentClass}`;
+            showNotification(`✓ ${msg}`);
+           
+            if (document.getElementById('subjectPageView').style.display === 'flex') {
+                closeSubjectPage();
+            }
+        }
+
+        function updateDashboardTitle() {
+            const dashTitle = document.getElementById('dashTitle');
+            const prefix = subjectData[selectedLang].welcomePrefix;
+            dashTitle.innerText = `${prefix} "${activeUsername}" (${currentClass})`;
+        }
+
+        function showNotification(text) {
+            const toast = document.getElementById('successNotification');
+            document.getElementById('successMessage').innerText = text;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function openSubjectPage(subjectKey) {
+            document.getElementById('dashboard').style.display = 'none';
+           
+            const langPack = subjectData[selectedLang];
+            const info = langPack[subjectKey];
+
+            document.getElementById('backBtnText').innerText = langPack.backText;
+            document.getElementById('pageTopicsHeader').innerText = langPack.topicsHeader;
+
+            document.getElementById('pageIntroTitle').innerText = `${info.title} (${currentClass})`;
+            document.getElementById('pageIntroText').innerText = info.desc;
+           
+            const topicsList = document.getElementById('pageIntroTopics');
+            topicsList.innerHTML = '';
+           
+            info.topics.forEach(topic => {
+                const li = document.createElement('li');
+                li.innerText = topic;
+                topicsList.appendChild(li);
+            });
+
+            document.getElementById('subjectPageView').style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closeSubjectPage() {
+            document.getElementById('subjectPageView').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goHome() {
+            closeSubjectPage();
+        }
+    </script>
+</body>
+</html>
